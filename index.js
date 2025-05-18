@@ -14,12 +14,12 @@ app.post("/api/bmw", async (req, res) => {
   }
 
   const vin7 = vin.slice(-7);
-  const searchUrl = `https://www.realoem.com/bmw/enUS/partxref?q=${encodeURIComponent(pieza)}&series=${vin7}`;
+  const url = `https://www.realoem.com/bmw/enUS/partxref?q=${encodeURIComponent(pieza)}&series=${vin7}`;
 
   try {
     const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
     const page = await browser.newPage();
-    await page.goto(searchUrl, { waitUntil: 'networkidle2' });
+    await page.goto(url, { waitUntil: 'networkidle2' });
 
     const partNumber = await page.evaluate(() => {
       const el = document.querySelector('.partxref__number');
@@ -29,12 +29,13 @@ app.post("/api/bmw", async (req, res) => {
     await browser.close();
 
     if (partNumber) {
-      res.json({ part_number: partNumber });
+      return res.json({ part_number: partNumber });
     } else {
-      res.json({ part_number: "NO RESULT" });
+      return res.json({ part_number: "NO RESULT" });
     }
+
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message });
   }
 });
 
